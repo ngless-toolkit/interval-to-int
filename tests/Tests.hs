@@ -12,6 +12,7 @@ import Test.QuickCheck.Instances ()
 import qualified Data.Vector.Storable as VS
 import           Data.IntervalIntMap.IntervalIntMap
 import           Data.Foldable (for_)
+import qualified Data.IntSet as IS
 
 
 tData =
@@ -41,6 +42,12 @@ case_partition =
         all (above $ toEnum split) (VS.toList right) @? "Right is not above split"
         VS.length left + VS.length center + VS.length right @=? VS.length tDataN
 
+case_build_tree_find = do
+    let t = mkTree 4 tDataN
+    for_ [0..14] $ \x ->
+        IS.fromList (intervalMapFind x t) @=? IS.fromList (naiveIntervalMapFind x tDataN)
+
 main :: IO ()
 main = $(defaultMainGenerator)
+
 
