@@ -3,6 +3,7 @@
 module Data.IntervalIntMap.IntervalIntMap
     ( IntervalValue(..)
     , NaiveIntervalInt
+    , intervalContains
     , partition
     ) where
 import qualified Foreign.Storable as FS
@@ -32,6 +33,11 @@ instance FS.Storable IntervalValue where
         FS.poke (castPtr ptr) s
         FS.poke (castPtr ptr `plusPtr` 4) p
         FS.poke (castPtr ptr `plusPtr` 8) v
+
+intervalContains :: Int -> IntervalValue -> Bool
+intervalContains p (IntervalValue s e _) =
+    let p' = toEnum p
+    in s <= p' && p' < e
 
 type NaiveIntervalInt = VS.Vector IntervalValue
 

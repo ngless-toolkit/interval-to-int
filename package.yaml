@@ -12,6 +12,7 @@ default-extensions:
   - OverloadedStrings
   - LambdaCase
   - TupleSections
+  - CPP
 dependencies:
   - base
   - containers
@@ -60,6 +61,7 @@ tests:
         - .
         - ./tests
     main: Tests.hs
+    cpp-options: -DIS_BUILDING_TEST
     dependencies:
       - tasty
       - tasty-th

@@ -31,14 +31,13 @@ tDataN :: NaiveIntervalInt
 tDataN = VS.fromList tData
 
 below x (IntervalValue _ e _) = x >= e
-include x (IntervalValue s e _) = s <= x && e > x
 above x (IntervalValue s _ _) = x < s
 
 case_partition =
     for_ [0..14] $ \split -> do
         let (left,center,right) = partition split tDataN
         all (below $ toEnum split) (VS.toList left) @? "Center does not include split"
-        all (include $ toEnum split) (VS.toList center) @? "Left is not below split"
+        all (intervalContains $ toEnum split) (VS.toList center) @? "Left is not below split"
         all (above $ toEnum split) (VS.toList right) @? "Right is not above split"
         VS.length left + VS.length center + VS.length right @=? VS.length tDataN
 
