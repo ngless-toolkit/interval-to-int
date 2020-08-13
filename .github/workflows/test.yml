@@ -1,0 +1,16 @@
+name: "Test interval-to-int"
+on: [push, pull_request]
+jobs:
+  runhaskell:
+    name: Build
+    runs-on: ubuntu-latest # or macOS-latest, or windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1.1
+        with:
+          enable-stack: true
+          stack-version: 'latest'
+          stack-no-global: true
+      - run: |
+          stack setup
+          stack test
