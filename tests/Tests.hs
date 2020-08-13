@@ -6,7 +6,11 @@ module Main where
 
 import Test.Tasty.HUnit
 import Test.Tasty.TH (defaultMainGenerator)
-import Test.QuickCheck.Instances ()
+import qualified Hedgehog as H
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
+import Test.Tasty.Hedgehog
+
 
 
 import qualified Data.Vector.Storable as VS
@@ -42,10 +46,28 @@ case_partition =
         all (above $ toEnum split) (VS.toList right) @? "Right is not above split"
         VS.length left + VS.length center + VS.length right @=? VS.length tDataN
 
-case_build_tree_find = do
+case_small_build_tree_find = do
     let t = mkTree 4 tDataN
     for_ [0..14] $ \x ->
         IS.fromList (intervalMapFind x t) @=? IS.fromList (naiveIntervalMapFind x tDataN)
+
+prop_build_tree_find = H.property $ do
+    -- the smaller values will generate more crowded inputs
+    space <- H.forAll $ Gen.integral (Range.linear 100 2000)
+    intervals <- H.forAll $ Gen.list (Range.linear 0 2000) $ do
+                                s <- Gen.integral (Range.linear 0 space)
+                                ell <- Gen.integral (Range.linear 0 space)
+                                return (s, s + ell)
+    ps <- H.forAll $ Gen.list (Range.linear 0 5) $ Gen.integral $ Range.linear 0 10000
+    H.classify "empty" $ length intervals == 0
+    H.classify "small (N< 100)" $ length intervals < 100
+    H.classify "large (N>=100)" $ length intervals >= 100
+    let naive = VS.fromList [IntervalValue s e ix | ((s,e),ix) <- zip intervals [0..]]
+        t = mkTree 16 naive
+    for_ ps $ \p ->
+        IS.fromList (intervalMapFind p t) H.===
+            IS.fromList (naiveIntervalMapFind p naive)
+
 
 main :: IO ()
 main = $(defaultMainGenerator)

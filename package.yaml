@@ -66,5 +66,6 @@ tests:
       - tasty
       - tasty-th
       - tasty-hunit
+      - tasty-hedgehog
       - tasty-quickcheck
-      - quickcheck-instances
+      - hedgehog
