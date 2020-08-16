@@ -3,8 +3,8 @@
 module Data.IntervalIntMap.IntervalIntMap
     ( IntervalValue(..)
     , IntervalIntMap
-    , naiveIntervalMapFind
-    , intervalMapFind
+    , naiveIntervalMapLookup
+    , lookup
     , NaiveIntervalInt
     , intervalContains
     , partition
@@ -13,8 +13,11 @@ module Data.IntervalIntMap.IntervalIntMap
     , mkTree
 #endif
     ) where
+import Prelude hiding (lookup)
+
 import qualified Foreign.Storable as FS
 import           Foreign.Ptr (castPtr, plusPtr)
+import qualified Data.IntSet as IS
 import qualified Data.Vector.Storable as VS
 import qualified Data.Vector.Storable.Mutable as VSM
 import           Control.Monad.ST (runST)
@@ -155,16 +158,16 @@ trySplit nIters maxSplit vec = InnerNode (fromEnum p) (r left) (r center) (r rig
         -- We pick the median end-point one, which is probably a decent impact
         p = ivPast $ (VS.!) vec (VS.length vec `div` 2)
 
-intervalMapFind :: Int -> IntervalIntMap -> [Int]
-intervalMapFind x (IntervalIntMap root) = intervalMapFind' root
+lookup :: Int -> IntervalIntMap -> IS.IntSet
+lookup x (IntervalIntMap root) = lookup' root
     where
 
-        intervalMapFind' (Leaf vec) = naiveIntervalMapFind x vec
-        intervalMapFind' (InnerNode p left center right)
-            | x < p = intervalMapFind' left ++ intervalMapFind' center
-            | x == p = intervalMapFind' center
-            | otherwise = intervalMapFind' center ++ intervalMapFind' right
+        lookup' (Leaf vec) = naiveIntervalMapLookup x vec
+        lookup' (InnerNode p left center right)
+            | x < p = lookup' left `IS.union` lookup' center
+            | x == p = lookup' center
+            | otherwise = lookup' center `IS.union` lookup' right
 
-naiveIntervalMapFind :: Int -> NaiveIntervalInt -> [Int]
-naiveIntervalMapFind x = VS.toList . VS.map (fromEnum . ivValue) . VS.filter (intervalContains x)
+naiveIntervalMapLookup :: Int -> NaiveIntervalInt -> IS.IntSet
+naiveIntervalMapLookup x = IS.fromList . VS.toList . VS.map (fromEnum . ivValue) . VS.filter (intervalContains x)
 

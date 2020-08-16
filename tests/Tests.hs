@@ -14,42 +14,42 @@ import Test.Tasty.Hedgehog
 
 
 import qualified Data.Vector.Storable as VS
-import           Data.IntervalIntMap.IntervalIntMap
+import qualified Data.IntervalIntMap.IntervalIntMap as IM
 import           Data.Foldable (for_)
 import qualified Data.IntSet as IS
 
 
 tData =
-    [ IntervalValue 0  2 0
-    , IntervalValue 0  2 1
-    , IntervalValue 1  2 2
-    , IntervalValue 3  6 3
-    , IntervalValue 3  4 4
-    , IntervalValue 1  4 5
-    , IntervalValue 4  7 6
-    , IntervalValue 4  6 7
-    , IntervalValue 8 10 8
-    , IntervalValue 1 12 9
+    [ IM.IntervalValue 0  2 0
+    , IM.IntervalValue 0  2 1
+    , IM.IntervalValue 1  2 2
+    , IM.IntervalValue 3  6 3
+    , IM.IntervalValue 3  4 4
+    , IM.IntervalValue 1  4 5
+    , IM.IntervalValue 4  7 6
+    , IM.IntervalValue 4  6 7
+    , IM.IntervalValue 8 10 8
+    , IM.IntervalValue 1 12 9
     ]
 
-tDataN :: NaiveIntervalInt
+tDataN :: IM.NaiveIntervalInt
 tDataN = VS.fromList tData
 
-below x (IntervalValue _ e _) = x >= e
-above x (IntervalValue s _ _) = x < s
+below x (IM.IntervalValue _ e _) = x >= e
+above x (IM.IntervalValue s _ _) = x < s
 
 case_partition =
     for_ [0..14] $ \split -> do
-        let (left,center,right) = partition split tDataN
+        let (left,center,right) = IM.partition split tDataN
         all (below $ toEnum split) (VS.toList left) @? "Center does not include split"
-        all (intervalContains $ toEnum split) (VS.toList center) @? "Left is not below split"
+        all (IM.intervalContains $ toEnum split) (VS.toList center) @? "Left is not below split"
         all (above $ toEnum split) (VS.toList right) @? "Right is not above split"
         VS.length left + VS.length center + VS.length right @=? VS.length tDataN
 
 case_small_build_tree_find = do
-    let t = mkTree 4 tDataN
+    let t = IM.mkTree 4 tDataN
     for_ [0..14] $ \x ->
-        IS.fromList (intervalMapFind x t) @=? IS.fromList (naiveIntervalMapFind x tDataN)
+        IM.lookup x t @=? IM.naiveIntervalMapLookup x tDataN
 
 prop_build_tree_find = H.property $ do
     -- the smaller values will generate more crowded inputs
@@ -62,11 +62,10 @@ prop_build_tree_find = H.property $ do
     H.classify "empty" $ length intervals == 0
     H.classify "small (N< 100)" $ length intervals < 100
     H.classify "large (N>=100)" $ length intervals >= 100
-    let naive = VS.fromList [IntervalValue s e ix | ((s,e),ix) <- zip intervals [0..]]
-        t = mkTree 16 naive
+    let naive = VS.fromList [IM.IntervalValue s e ix | ((s,e),ix) <- zip intervals [0..]]
+        t = IM.mkTree 16 naive
     for_ ps $ \p ->
-        IS.fromList (intervalMapFind p t) H.===
-            IS.fromList (naiveIntervalMapFind p naive)
+        IM.lookup p t H.=== IM.naiveIntervalMapLookup p naive
 
 
 main :: IO ()
