@@ -8,7 +8,10 @@ module Data.IntervalIntMap.IntervalIntMap
     , NaiveIntervalInt
     , intervalContains
     , partition
+    , freeze
+#ifdef IS_BUILDING_TEST
     , mkTree
+#endif
     ) where
 import qualified Foreign.Storable as FS
 import           Foreign.Ptr (castPtr, plusPtr)
@@ -122,6 +125,12 @@ sortedByEnd vec = VS.create $ do
     vec' <- VS.thaw vec
     sortBy (comparing ivPast) vec'
     return vec'
+
+{-|
+  Turn a 'NaiveIntervalInt' into an 'IntervalIntMap'
+-}
+freeze :: NaiveIntervalInt -> IntervalIntMap
+freeze = mkTree 16
 
 mkTree :: Int -> NaiveIntervalInt -> IntervalIntMap
 mkTree maxSplit vec = IntervalIntMap $ mkTree' 0 maxSplit (sortedByEnd vec)
