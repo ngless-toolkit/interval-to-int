@@ -36,7 +36,8 @@ library:
     source-dirs: ./
     exposed-modules:
       - Data.IntervalIntMap.IntervalIntMap
-    other-modules: []
+    other-modules:
+      - Data.IntervalIntMap.Internal.GrowableVector
 
 tests:
   interval-int-map-test:

@@ -15,7 +15,8 @@ import Test.Tasty.Hedgehog
 
 import qualified Data.Vector.Storable as VS
 import qualified Data.IntervalIntMap.IntervalIntMap as IM
-import           Data.Foldable (for_)
+import qualified Data.IntervalIntMap.Internal.GrowableVector as GV
+import           Data.Foldable (forM_, for_)
 import qualified Data.IntSet as IS
 
 
@@ -83,6 +84,15 @@ prop_naive_overlaps1 = H.property $ do
     H.classify "overlaps" $ doesOverlap
     H.classify "no overlap" $ not doesOverlap
     (not . IS.null $ IM.naiveOverlaps i naive) H.=== doesOverlap
+
+prop_growable_vector = H.property $ do
+    values <- H.forAll $ Gen.list (Range.linear 0 1000) $ Gen.integral (Range.linear 0 1000)
+    let direct = VS.fromList (values :: [Int])
+    built <- do
+        gv <- GV.new
+        forM_ values (`GV.pushBack` gv)
+        GV.unsafeFreeze gv
+    direct H.=== built
 
 main :: IO ()
 main = $(defaultMainGenerator)

@@ -18,16 +18,15 @@ module Data.IntervalIntMap.IntervalIntMap
     ) where
 import Prelude hiding (lookup)
 
+import qualified Data.IntervalIntMap.Internal.GrowableVector as GV
+
 import qualified Foreign.Storable as FS
 import           Foreign.Ptr (castPtr, plusPtr)
 import qualified Data.IntSet as IS
 import qualified Data.Vector.Storable as VS
-import qualified Data.Vector.Storable.Mutable as VSM
 import           Control.Monad.ST (runST)
-import           Control.Monad.Primitive (PrimMonad, PrimState)
 import           Data.Word (Word32)
 import           Data.Ord (comparing)
-import           Data.STRef (readSTRef, newSTRef, writeSTRef)
 import           Data.Vector.Algorithms.Tim (sortBy)
 
 
@@ -95,41 +94,21 @@ data IntervalIntMapNode = Leaf NaiveIntervalInt
 
 newtype IntervalIntMap = IntervalIntMap { _imapRoot :: IntervalIntMapNode }
 
-data GrowableVector s = GrowableVector !Int !Int !(VSM.MVector s IntervalValue)
-
-newGV :: (PrimMonad m) => m (GrowableVector (PrimState m))
-newGV = GrowableVector 0 16 <$> VSM.unsafeNew 16
-
-finalize ref = do
-    GrowableVector used _ vec <- readSTRef ref
-    VS.take used <$> VS.unsafeFreeze vec
-
-pushBack val (GrowableVector used cap vec)
-    | used == cap = do
-        vec' <- VSM.grow vec (cap `div` 2)
-        pushBack val (GrowableVector used (cap + (cap `div` 2)) vec')
-    | otherwise = do
-        VSM.write vec used val
-        return $! GrowableVector (used+1) cap vec
-
 partition :: Int -> NaiveIntervalInt -> (NaiveIntervalInt, NaiveIntervalInt, NaiveIntervalInt)
 partition p vec = runST $ do
-    left <- newSTRef =<< newGV
-    center <- newSTRef =<< newGV
-    right <- newSTRef =<< newGV
+    left <- GV.new
+    center <- GV.new
+    right <- GV.new
     VS.forM_ vec $ \val ->
         let target
                 | ivPast val <= toEnum p = left
                 | ivStart val > toEnum p = right
                 | otherwise = center
-        in
-            readSTRef target >>=
-                pushBack val >>=
-                writeSTRef target
+        in GV.pushBack val target
     (,,)
-        <$> finalize left
-        <*> finalize center
-        <*> finalize right
+        <$> GV.unsafeFreeze left
+        <*> GV.unsafeFreeze center
+        <*> GV.unsafeFreeze right
 
 
 sortedByEnd :: NaiveIntervalInt -> NaiveIntervalInt
