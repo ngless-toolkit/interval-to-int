@@ -51,13 +51,15 @@ case_small_build_tree_find = do
     for_ [0..14] $ \x ->
         IM.lookup x t @=? IM.naiveIntervalMapLookup x tDataN
 
+genSimpleInterval space = do
+    s <- Gen.integral (Range.linear 0 space)
+    len <- Gen.integral (Range.linear 0 space)
+    return (s, s + len)
+
 prop_build_tree_find = H.property $ do
     -- the smaller values will generate more crowded inputs
     space <- H.forAll $ Gen.integral (Range.linear 100 2000)
-    intervals <- H.forAll $ Gen.list (Range.linear 0 2000) $ do
-                                s <- Gen.integral (Range.linear 0 space)
-                                ell <- Gen.integral (Range.linear 0 space)
-                                return (s, s + ell)
+    intervals <- H.forAll $ Gen.list (Range.linear 0 2000) $ genSimpleInterval space
     ps <- H.forAll $ Gen.list (Range.linear 0 5) $ Gen.integral $ Range.linear 0 10000
     H.classify "empty" $ length intervals == 0
     H.classify "small (N< 100)" $ length intervals < 100
@@ -67,6 +69,20 @@ prop_build_tree_find = H.property $ do
     for_ ps $ \p ->
         IM.lookup p t H.=== IM.naiveIntervalMapLookup p naive
 
+
+
+prop_naive_overlaps1 = H.property $ do
+    (s,e) <- H.forAll $ genSimpleInterval 100
+    (s',e') <- H.forAll $ genSimpleInterval 100
+    let naive = VS.fromList [IM.IntervalValue (toEnum s) (toEnum e) 0]
+        i = IM.Interval s' e'
+        doesOverlap
+            | s >= e = False
+            | otherwise = any (\c -> s' <= c && c < e') [s..(e-1)]
+    H.classify "empty interval" $ s == e || s' == e'
+    H.classify "overlaps" $ doesOverlap
+    H.classify "no overlap" $ not doesOverlap
+    (not . IS.null $ IM.naiveOverlaps i naive) H.=== doesOverlap
 
 main :: IO ()
 main = $(defaultMainGenerator)

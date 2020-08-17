@@ -2,9 +2,12 @@
 
 module Data.IntervalIntMap.IntervalIntMap
     ( IntervalValue(..)
+    , Interval(..)
     , IntervalIntMap
     , naiveIntervalMapLookup
     , lookup
+    , overlaps
+    , naiveOverlaps
     , NaiveIntervalInt
     , intervalContains
     , partition
@@ -44,6 +47,12 @@ import           Data.Vector.Algorithms.Tim (sortBy)
  -
  - Leafs contain NaiveIntervalInt
  -}
+
+
+data Interval = Interval !Int !Int
+#ifdef IS_BUILDING_TEST
+                            deriving (Show)
+#endif
 
 data IntervalValue = IntervalValue
                         { ivStart :: !Word32
@@ -113,7 +122,7 @@ partition p vec = runST $ do
                 | ivPast val <= toEnum p = left
                 | ivStart val > toEnum p = right
                 | otherwise = center
-        in 
+        in
             readSTRef target >>=
                 pushBack val >>=
                 writeSTRef target
@@ -170,4 +179,28 @@ lookup x (IntervalIntMap root) = lookup' root
 
 naiveIntervalMapLookup :: Int -> NaiveIntervalInt -> IS.IntSet
 naiveIntervalMapLookup x = IS.fromList . VS.toList . VS.map (fromEnum . ivValue) . VS.filter (intervalContains x)
+
+naiveOverlaps :: Interval -> NaiveIntervalInt -> IS.IntSet
+naiveOverlaps (Interval s0 e0) = IS.fromList . VS.toList . VS.map (fromEnum . ivValue) . VS.filter overlap1
+    where
+        overlap1 (IntervalValue s1' e1' _)
+            | s0 == e0 = False
+            | s1' == e1' = False
+            | otherwise =
+                let
+                    s1 = fromEnum s1'
+                    e1 = fromEnum e1'
+                in (s0 <= s1 && s1 < e0) || (s1 <= s0 && s0 < e1)
+
+overlaps :: Interval -> IntervalIntMap -> IS.IntSet
+overlaps i (IntervalIntMap root) = overlaps' i root
+
+overlaps' i (Leaf vec) = naiveOverlaps i vec
+overlaps' i (InnerNode p left centre right)
+    | i `intervalAbove` p = overlaps'  i right `IS.union` overlaps' i centre
+    | i `intervalBelow` p = overlaps' i left `IS.union` overlaps' i centre
+    | otherwise = overlaps' i left `IS.union` overlaps' i centre `IS.union` overlaps' i right
+
+intervalAbove (Interval s _) p = s > p
+intervalBelow (Interval _ e) p = e <= p
 
