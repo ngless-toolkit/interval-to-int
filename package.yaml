@@ -35,9 +35,10 @@ ghc-options:
 library:
     source-dirs: ./
     exposed-modules:
-      - Data.IntervalIntMap.IntervalIntMap
+      - Data.IntervalIntMap
     other-modules:
       - Data.IntervalIntMap.Internal.GrowableVector
+      - Data.IntervalIntMap.Internal.IntervalIntIntMap
 
 tests:
   interval-int-map-test:

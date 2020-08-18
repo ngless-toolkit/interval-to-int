@@ -14,7 +14,8 @@ import Test.Tasty.Hedgehog
 
 
 import qualified Data.Vector.Storable as VS
-import qualified Data.IntervalIntMap.IntervalIntMap as IM
+import qualified Data.IntervalIntMap as IMA
+import qualified Data.IntervalIntMap.Internal.IntervalIntIntMap as IM
 import qualified Data.IntervalIntMap.Internal.GrowableVector as GV
 import           Data.Foldable (forM_, for_)
 import qualified Data.IntSet as IS
@@ -93,6 +94,17 @@ prop_growable_vector = H.property $ do
         forM_ values (`GV.pushBack` gv)
         GV.unsafeFreeze gv
     direct H.=== built
+
+case_simple_ima = do
+    acc <- IMA.new
+    IMA.insert (IMA.Interval 2 4) (7 :: Int) acc
+    IMA.insert (IMA.Interval 3 6) (8 :: Int) acc
+    im <- IMA.freeze acc
+    IMA.lookup 1 im @=? []
+    IMA.lookup 2 im @=? [7]
+    IS.fromList (IMA.lookup 3 im) @=? IS.fromList [7,8]
+    IMA.lookup 4 im @=? [8]
+    
 
 main :: IO ()
 main = $(defaultMainGenerator)

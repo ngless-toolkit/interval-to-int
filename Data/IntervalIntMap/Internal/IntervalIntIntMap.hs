@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Data.IntervalIntMap.IntervalIntMap
+module Data.IntervalIntMap.Internal.IntervalIntIntMap
     ( IntervalValue(..)
     , Interval(..)
     , IntervalIntMap
@@ -93,6 +93,9 @@ data IntervalIntMapNode = Leaf NaiveIntervalInt
 #endif
 
 newtype IntervalIntMap = IntervalIntMap { _imapRoot :: IntervalIntMapNode }
+#ifdef IS_BUILDING_TEST
+                              deriving (Show)
+#endif
 
 partition :: Int -> NaiveIntervalInt -> (NaiveIntervalInt, NaiveIntervalInt, NaiveIntervalInt)
 partition p vec = runST $ do
