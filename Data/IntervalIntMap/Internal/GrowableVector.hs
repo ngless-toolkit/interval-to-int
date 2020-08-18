@@ -6,7 +6,10 @@ module Data.IntervalIntMap.Internal.GrowableVector
     , new
     , pushBack
     , unsafeFreeze
+    , length
     ) where
+
+import Prelude hiding (length)
 
 import qualified Data.Vector.Storable as VS
 import qualified Data.Vector.Storable.Mutable as VSM
@@ -42,3 +45,7 @@ unsafeFreeze gv = do
     GrowableVectorData used vec <- readMutVar gv
     VS.take used <$> VS.unsafeFreeze vec
 
+length :: (PrimMonad m, Storable a) => GrowableVector (PrimState m) a -> m Int
+length gv = do
+    GrowableVectorData len _ <- readMutVar gv
+    return len
