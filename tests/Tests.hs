@@ -99,7 +99,7 @@ case_simple_ima = do
     acc <- IMA.new
     IMA.insert (IMA.Interval 2 4) (7 :: Int) acc
     IMA.insert (IMA.Interval 3 6) (8 :: Int) acc
-    im <- IMA.freeze acc
+    im <- IMA.unsafeFreeze acc
     IMA.lookup 1 im @=? []
     IMA.lookup 2 im @=? [7]
     IS.fromList (IMA.lookup 3 im) @=? IS.fromList [7,8]
