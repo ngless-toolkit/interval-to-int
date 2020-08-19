@@ -12,10 +12,11 @@ module Data.IntervalIntMap
     , insert
     , unsafeFreeze
     , lookup
+    , map
     , overlaps
     ) where
 
-import Prelude hiding (lookup)
+import Prelude hiding (lookup, map)
 
 import qualified Data.IntervalIntMap.Internal.IntervalIntIntMap as IM
 import qualified Data.IntervalIntMap.Internal.GrowableVector as GV
@@ -83,6 +84,11 @@ indexAll values = (fmap $ (VS.!) values) . IS.toList
 -- |Lookup all values whose keys intersect the given position
 lookup ::  Storable a => Int -> IntervalIntMap a -> [a]
 lookup p (IntervalIntMap imap values) = indexAll values $ IM.lookup p imap
+
+-- |Map: note that both the input and output types must be instances of
+-- Storable, so this is not a functor.
+map :: (Storable a, Storable b) => (a -> b) -> IntervalIntMap a -> IntervalIntMap b
+map f (IntervalIntMap im vs) = IntervalIntMap im (VS.map f vs)
 
 -- |Lookup all values that overlap with the given input
 overlaps :: Storable a => IM.Interval -> IntervalIntMap a -> [a]
