@@ -24,6 +24,7 @@ import qualified Data.Vector.Storable as VS
 import qualified Data.IntSet as IS
 import           Foreign.Storable (Storable(..))
 import           Control.Monad.Primitive (PrimMonad, PrimState)
+import           Control.Arrow (second)
 
 
 {-| The typical interval map structure models a function of the type @ f :: Int
@@ -92,5 +93,9 @@ map f (IntervalIntMap im vs) = IntervalIntMap im (VS.map f vs)
 
 -- |Lookup all values that overlap with the given input
 overlaps :: Storable a => IM.Interval -> IntervalIntMap a -> [a]
-overlaps i (IntervalIntMap imap values) = indexAll values $ IM.overlaps i imap
+overlaps i = fmap snd . overlapsWithKeys i
+
+-- |Lookup all values that overlap with the given input
+overlapsWithKeys :: Storable a => IM.Interval -> IntervalIntMap a -> [(IM.Interval,a)]
+overlapsWithKeys i (IntervalIntMap imap values) = fmap (second $ (VS.!) values) $ IM.overlapsWithKeys i imap
 

@@ -7,7 +7,9 @@ module Data.IntervalIntMap.Internal.IntervalIntIntMap
     , naiveIntervalMapLookup
     , lookup
     , overlaps
+    , overlapsWithKeys
     , naiveOverlaps
+    , naiveOverlapsWithKeys
     , NaiveIntervalInt
     , intervalContains
     , partition
@@ -22,6 +24,7 @@ import qualified Data.IntervalIntMap.Internal.GrowableVector as GV
 
 import qualified Foreign.Storable as FS
 import           Foreign.Ptr (castPtr, plusPtr)
+import qualified Data.Set as S
 import qualified Data.IntSet as IS
 import qualified Data.Vector.Storable as VS
 import           Control.Monad.ST (runST)
@@ -61,6 +64,16 @@ data IntervalValue = IntervalValue
 #ifdef IS_BUILDING_TEST
                               deriving (Show)
 #endif
+
+instance Eq IntervalValue where
+    (IntervalValue s0 e0 ix0) == (IntervalValue s1 e1 ix1) =
+            s0 == s1 && e0 == e1 && ix0 == ix1
+
+instance Ord IntervalValue where
+    (IntervalValue s0 e0 ix0) `compare` (IntervalValue s1 e1 ix1)
+        | s0 /= s1 = s0 `compare` s1
+        | e0 /= e1 = e0 `compare` e1
+        | otherwise = ix0 `compare` ix1
 
 instance FS.Storable IntervalValue where
     sizeOf _ = 3 * 4 -- aka 12
@@ -163,7 +176,15 @@ naiveIntervalMapLookup :: Int -> NaiveIntervalInt -> IS.IntSet
 naiveIntervalMapLookup x = IS.fromList . VS.toList . VS.map (fromEnum . ivValue) . VS.filter (intervalContains x)
 
 naiveOverlaps :: Interval -> NaiveIntervalInt -> IS.IntSet
-naiveOverlaps (Interval s0 e0) = IS.fromList . VS.toList . VS.map (fromEnum . ivValue) . VS.filter overlap1
+naiveOverlaps i = IS.fromList . map snd . naiveOverlapsWithKeys i
+
+naiveOverlapsWithKeys :: Interval -> NaiveIntervalInt -> [(Interval, Int)]
+naiveOverlapsWithKeys i = map asPair . S.toList . naiveOverlapsWithKeys' i
+
+asPair (IntervalValue s e ix) = (Interval (fromEnum s) (fromEnum e), fromEnum ix)
+
+naiveOverlapsWithKeys' :: Interval -> NaiveIntervalInt -> S.Set IntervalValue
+naiveOverlapsWithKeys' (Interval s0 e0) = S.fromList . VS.toList . VS.filter overlap1
     where
         overlap1 (IntervalValue s1' e1' _)
             | s0 == e0 = False
@@ -182,6 +203,16 @@ overlaps' i (InnerNode p left centre right)
     | i `intervalAbove` p = overlaps'  i right `IS.union` overlaps' i centre
     | i `intervalBelow` p = overlaps' i left `IS.union` overlaps' i centre
     | otherwise = overlaps' i left `IS.union` overlaps' i centre `IS.union` overlaps' i right
+
+overlapsWithKeys :: Interval -> IntervalIntMap -> [(Interval, Int)]
+overlapsWithKeys i (IntervalIntMap root) = map asPair . S.toList $ overlapsWithKeys' i root
+
+overlapsWithKeys' :: Interval -> IntervalIntMapNode -> S.Set IntervalValue
+overlapsWithKeys' i (Leaf vec) = naiveOverlapsWithKeys' i vec
+overlapsWithKeys' i (InnerNode p left centre right)
+    | i `intervalAbove` p = overlapsWithKeys'  i right `S.union` overlapsWithKeys' i centre
+    | i `intervalBelow` p = overlapsWithKeys' i left `S.union` overlapsWithKeys' i centre
+    | otherwise = overlapsWithKeys' i left `S.union` overlapsWithKeys' i centre `S.union` overlapsWithKeys' i right
 
 intervalAbove (Interval s _) p = s > p
 intervalBelow (Interval _ e) p = e <= p
