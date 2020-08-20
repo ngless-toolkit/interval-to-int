@@ -1,7 +1,7 @@
-name:           IntervalIntMap
+name:           int-interval-map
 version:        '0.0.0.0'
 synopsis:       Interval map
-category:       Domain Specific Language
+category:       Data
 author:         Luis Pedro Coelho
 maintainer:     luis@luispedro.org
 license:        MIT
