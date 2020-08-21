@@ -14,6 +14,7 @@ module Data.IntervalIntMap
     , lookup
     , map
     , overlaps
+    , overlapsWithKeys
     ) where
 
 import Prelude hiding (lookup, map)

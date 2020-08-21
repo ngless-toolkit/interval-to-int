@@ -104,7 +104,15 @@ case_simple_ima = do
     IMA.lookup 2 im @=? [7]
     IS.fromList (IMA.lookup 3 im) @=? IS.fromList [7,8]
     IMA.lookup 4 im @=? [8]
-    
+    (length $ IMA.overlaps (IMA.Interval 2 5) im) @=? 2
+    (length $ IMA.overlapsWithKeys (IMA.Interval 2 5) im) @=? 2
+
+    (length $ IMA.overlaps (IMA.Interval 4 5) im) @=? 1
+    (length $ IMA.overlapsWithKeys (IMA.Interval 4 5) im) @=? 1
+
+    (length $ IMA.overlaps (IMA.Interval 4 9) im) @=? 1
+    (length $ IMA.overlapsWithKeys (IMA.Interval 4 9) im) @=? 1
+
 
 main :: IO ()
 main = $(defaultMainGenerator)
