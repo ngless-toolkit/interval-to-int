@@ -9,6 +9,7 @@ module Data.IntervalIntMap
     , IntervalIntMapAccumulator
     , IM.Interval(..)
     , fromList
+    , elems
     , new
     , insert
     , unsafeFreeze
@@ -64,10 +65,13 @@ data IntervalIntMapAccumulator s a = IntervalIntMapAccumulator
 
 -- |Create an 'IntervalIntMap' from a list of (key, value)
 fromList :: Storable a => [(IM.Interval, a)] -> IntervalIntMap a
-fromList elems = runST $ do
+fromList vs = runST $ do
     acc <- new
-    forM_ elems $ \(i,v) -> insert i v acc
+    forM_ vs $ \(i,v) -> insert i v acc
     unsafeFreeze acc
+
+elems :: Storable a => IntervalIntMap a -> [a]
+elems (IntervalIntMap _ vals) = VS.toList vals
 
 -- |New (empty) accumulator
 new :: (PrimMonad m, Storable a) => m (IntervalIntMapAccumulator (PrimState m) a)
