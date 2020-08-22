@@ -113,6 +113,10 @@ case_simple_ima = do
     (length $ IMA.overlaps (IMA.Interval 4 9) im) @=? 1
     (length $ IMA.overlapsWithKeys (IMA.Interval 4 9) im) @=? 1
 
+case_fromList = do
+    let im = IMA.fromList [(IMA.Interval (fromEnum s) (fromEnum e), v) | (IM.IntervalValue s e v) <- tData]
+    IMA.overlapsWithKeys (IM.Interval 11 15)  im @?= [(IM.Interval 1 12, 9)]
+
 
 main :: IO ()
 main = $(defaultMainGenerator)

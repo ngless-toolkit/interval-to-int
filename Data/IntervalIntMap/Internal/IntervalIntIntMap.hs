@@ -53,7 +53,7 @@ import           Data.Vector.Algorithms.Tim (sortBy)
 
 data Interval = Interval !Int !Int
 #ifdef IS_BUILDING_TEST
-                            deriving (Show)
+                            deriving (Eq, Show)
 #endif
 
 data IntervalValue = IntervalValue

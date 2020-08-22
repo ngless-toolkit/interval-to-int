@@ -8,6 +8,7 @@ module Data.IntervalIntMap
 #endif
     , IntervalIntMapAccumulator
     , IM.Interval(..)
+    , fromList
     , new
     , insert
     , unsafeFreeze
@@ -25,6 +26,8 @@ import qualified Data.Vector.Storable as VS
 import qualified Data.IntSet as IS
 import           Foreign.Storable (Storable(..))
 import           Control.Monad.Primitive (PrimMonad, PrimState)
+import           Control.Monad (forM_)
+import           Control.Monad.ST (runST)
 import           Control.Arrow (second)
 
 
@@ -57,6 +60,14 @@ data IntervalIntMap a = IntervalIntMap !IM.IntervalIntMap
 data IntervalIntMapAccumulator s a = IntervalIntMapAccumulator
                                         !(GV.GrowableVector s (IM.IntervalValue))
                                         !(GV.GrowableVector s a)
+
+
+-- |Create an 'IntervalIntMap' from a list of (key, value)
+fromList :: Storable a => [(IM.Interval, a)] -> IntervalIntMap a
+fromList elems = runST $ do
+    acc <- new
+    forM_ elems $ \(i,v) -> insert i v acc
+    unsafeFreeze acc
 
 -- |New (empty) accumulator
 new :: (PrimMonad m, Storable a) => m (IntervalIntMapAccumulator (PrimState m) a)
