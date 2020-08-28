@@ -30,6 +30,7 @@ import           Control.Monad.Primitive (PrimMonad, PrimState)
 import           Control.Monad (forM_)
 import           Control.Monad.ST (runST)
 import           Control.Arrow (second)
+import           Control.DeepSeq (NFData(..))
 
 
 {-| The typical interval map structure models a function of the type @ f :: Int
@@ -57,6 +58,9 @@ import           Control.Arrow (second)
 data IntervalIntMap a = IntervalIntMap !IM.IntervalIntMap
                                        !(VS.Vector a)
 
+
+instance NFData (IntervalIntMap a) where
+    rnf (IntervalIntMap im v) = rnf im `seq` rnf v
 
 data IntervalIntMapAccumulator s a = IntervalIntMapAccumulator
                                         !(GV.GrowableVector s (IM.IntervalValue))

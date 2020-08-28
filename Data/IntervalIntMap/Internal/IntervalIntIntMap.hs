@@ -31,6 +31,7 @@ import           Control.Monad.ST (runST)
 import           Data.Word (Word32)
 import           Data.Ord (comparing)
 import           Data.Vector.Algorithms.Tim (sortBy)
+import           Control.DeepSeq (NFData(..))
 
 
 {- DATA STRUCTURE
@@ -105,10 +106,17 @@ data IntervalIntMapNode = Leaf NaiveIntervalInt
                               deriving (Show)
 #endif
 
+instance NFData IntervalIntMapNode where
+    rnf (Leaf v) = rnf v
+    rnf (InnerNode !_ left center right) = rnf left `seq` rnf center `seq` rnf right
+
 newtype IntervalIntMap = IntervalIntMap { _imapRoot :: IntervalIntMapNode }
 #ifdef IS_BUILDING_TEST
                               deriving (Show)
 #endif
+
+instance NFData IntervalIntMap where
+    rnf (IntervalIntMap !n) = rnf n
 
 partition :: Int -> NaiveIntervalInt -> (NaiveIntervalInt, NaiveIntervalInt, NaiveIntervalInt)
 partition p vec = runST $ do
