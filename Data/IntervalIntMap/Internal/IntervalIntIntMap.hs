@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TypeApplications #-}
 
 module Data.IntervalIntMap.Internal.IntervalIntIntMap
     ( IntervalValue(..)
@@ -84,9 +84,10 @@ instance FS.Storable IntervalValue where
                     <*> FS.peek (castPtr p `plusPtr` 4)
                     <*> FS.peek (castPtr p `plusPtr` 8)
     poke ptr (IntervalValue s p v) = do
-        FS.poke (castPtr ptr) s
-        FS.poke (castPtr ptr `plusPtr` 4) p
-        FS.poke (castPtr ptr `plusPtr` 8) v
+        let ptr' = castPtr ptr
+        FS.pokeElemOff @Word32 ptr' 0 s
+        FS.pokeElemOff @Word32 ptr' 1 p
+        FS.pokeElemOff @Word32 ptr' 2 v
 
 intervalContains :: Int -> IntervalValue -> Bool
 intervalContains p (IntervalValue s e _) =
