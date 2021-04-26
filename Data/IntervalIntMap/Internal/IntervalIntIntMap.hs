@@ -70,6 +70,7 @@ instance Eq IntervalValue where
     (IntervalValue s0 e0 ix0) == (IntervalValue s1 e1 ix1) =
             s0 == s1 && e0 == e1 && ix0 == ix1
 
+-- This is necessary to build sets of 'IntervalValue's (e.g., in 'naiveOverlapsWithKeys')
 instance Ord IntervalValue where
     (IntervalValue s0 e0 ix0) `compare` (IntervalValue s1 e1 ix1)
         | s0 /= s1 = s0 `compare` s1
@@ -166,9 +167,14 @@ trySplit nIters maxSplit vec = InnerNode (fromEnum p) (r left) (r center) (r rig
         nIters'
             | successful = 0
             | otherwise = nIters + 1
+
+        -- The criterion for calling it a successful split is a bit random, but seems to work:
+        -- If after splitting the largest component is at least maxSplit
+        -- smaller than the input, that was a successful split
         successful = VS.length vec - maximum (map VS.length [left, center, right]) >= maxSplit
+
         -- Choosing a pivot will probably have a big impact on the performance.
-        -- We pick the median end-point one, which is probably a decent impact
+        -- We pick the median end-point one, which is probably a decent heuristic
         p = ivPast $ (VS.!) vec (VS.length vec `div` 2)
 
 lookup :: Int -> IntervalIntMap -> IS.IntSet
