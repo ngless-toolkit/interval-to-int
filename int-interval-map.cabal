@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3e25211fda12be9cd8790702dd7b4d2ab2a46c1341bea82467bed1d635d99204
+-- hash: d18e6b8d80664fd1b16f401cde330cbd7deb48f2b61553995a9a6ed4dd4903a5
 
 name:           int-interval-map
 version:        0.0.0.0
@@ -33,7 +33,12 @@ library
       Data.IntervalIntMap.Internal.IntervalIntIntMap
   hs-source-dirs:
       ./
-  default-extensions: BangPatterns OverloadedStrings LambdaCase TupleSections CPP
+  default-extensions:
+      BangPatterns
+      OverloadedStrings
+      LambdaCase
+      TupleSections
+      CPP
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   build-depends:
       base
@@ -54,9 +59,14 @@ test-suite interval-int-map-test
       Data.IntervalIntMap.Internal.IntervalIntIntMap
       Paths_int_interval_map
   hs-source-dirs:
-      ./.
+      ./
       ./tests
-  default-extensions: BangPatterns OverloadedStrings LambdaCase TupleSections CPP
+  default-extensions:
+      BangPatterns
+      OverloadedStrings
+      LambdaCase
+      TupleSections
+      CPP
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   cpp-options: -DIS_BUILDING_TEST
   build-depends:
