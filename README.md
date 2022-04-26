@@ -13,5 +13,14 @@ Do get [in touch](mailto:luis@luispedro.org) if you want to use it more
 generally, but the plans for this repo is to develop it only in so far as it
 helps with NGLess' goals.
 
+## Citation
+
+If you do use this repository, please cite the main [NGLess](https://ngless.embl.de) paper:
+
+> _NG-meta-profiler: fast processing of metagenomes using NGLess, a
+> domain-specific language_ by Luis Pedro Coelho, Renato Alves, Paulo Monteiro,
+> Jaime Huerta-Cepas, Ana Teresa Freitas, Peer Bork, Microbiome (2019)
+> [https://doi.org/10.1186/s40168-019-0684-8](https://doi.org/10.1186/s40168-019-0684-8)
+
 LICENSE: MIT
 
