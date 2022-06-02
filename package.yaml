@@ -1,12 +1,13 @@
 name:           int-interval-map
-version:        '0.0.0.0'
+version:        '0.0.1.0'
 synopsis:       Interval map
 category:       Data
+description:    'Interval map with support for overlapping intervals'
 author:         Luis Pedro Coelho
 maintainer:     luis@luispedro.org
 license:        MIT
 license-file:   COPYING
-github:         luispedro/interval-to-int
+github:         ngless-toolkit/interval-to-int
 default-extensions:
   - BangPatterns
   - OverloadedStrings
@@ -14,7 +15,7 @@ default-extensions:
   - TupleSections
   - CPP
 dependencies:
-  - base
+  - base >= 4.12 && < 4.16
   - containers
   - deepseq
   - either

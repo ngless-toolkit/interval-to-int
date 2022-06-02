@@ -4,14 +4,15 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d18e6b8d80664fd1b16f401cde330cbd7deb48f2b61553995a9a6ed4dd4903a5
+-- hash: a6fd4a2bc6feee2444e88bd5e1d7922a8a860bdf846ee75842b6d97fd876b9a9
 
 name:           int-interval-map
-version:        0.0.0.0
+version:        0.0.1.0
 synopsis:       Interval map
+description:    Interval map with support for overlapping intervals
 category:       Data
-homepage:       https://github.com/luispedro/interval-to-int#readme
-bug-reports:    https://github.com/luispedro/interval-to-int/issues
+homepage:       https://github.com/ngless-toolkit/interval-to-int#readme
+bug-reports:    https://github.com/ngless-toolkit/interval-to-int/issues
 author:         Luis Pedro Coelho
 maintainer:     luis@luispedro.org
 license:        MIT
@@ -23,7 +24,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/luispedro/interval-to-int
+  location: https://github.com/ngless-toolkit/interval-to-int
 
 library
   exposed-modules:
@@ -41,7 +42,7 @@ library
       CPP
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   build-depends:
-      base
+      base >=4.12 && <4.16
     , containers
     , deepseq
     , either
@@ -70,7 +71,7 @@ test-suite interval-int-map-test
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   cpp-options: -DIS_BUILDING_TEST
   build-depends:
-      base
+      base >=4.12 && <4.16
     , containers
     , deepseq
     , either
