@@ -15,7 +15,7 @@ default-extensions:
   - TupleSections
   - CPP
 dependencies:
-  - base >= 4.12 && < 4.16
+  - base >= 4.12 && < 4.21
   - containers
   - deepseq
   - either

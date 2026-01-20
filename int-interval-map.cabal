@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a6fd4a2bc6feee2444e88bd5e1d7922a8a860bdf846ee75842b6d97fd876b9a9
+-- hash: 988b172aa417faf38a6db8aa876c95629575566f6b5cd269d57939b49a5d5072
 
 name:           int-interval-map
 version:        0.0.1.0
@@ -42,7 +42,7 @@ library
       CPP
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   build-depends:
-      base >=4.12 && <4.16
+      base >=4.12 && <4.21
     , containers
     , deepseq
     , either
@@ -71,7 +71,7 @@ test-suite interval-int-map-test
   ghc-options: -Wall -Wcompat -fwarn-tabs -fno-warn-missing-signatures -O2
   cpp-options: -DIS_BUILDING_TEST
   build-depends:
-      base >=4.12 && <4.16
+      base >=4.12 && <4.21
     , containers
     , deepseq
     , either

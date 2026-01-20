@@ -2,8 +2,8 @@ let
   sources = {
     haskellNix = builtins.fetchTarball {
       name = "haskell-nix-snap";
-      url = "https://github.com/input-output-hk/haskell.nix/archive/c6a5afba7e259e9908f9dc56ce711173cda4549b.tar.gz";
-      sha256 = "0g58zvyqd47c1y2w84qbf1x29yp4pfdz2gqligvgn1jlx972i53n";
+      url = "https://github.com/input-output-hk/haskell.nix/archive/0db8595ce9ad5875bdfbada0ef0652bb1d4f5e86.tar.gz";
+      sha256 = "07jdskdxm39n4kahb0bd1l09v84hgki23hn4b6kiqypynxjan2m6";
     };
   };
 
@@ -30,5 +30,15 @@ in pkgs.haskell-nix.stackProject {
     # ignore paths that change frequently, but do not contribute to the result
     filter = path: type: let baseName = baseNameOf (toString path); in !(pkgs.lib.elem baseName ignoredPaths);
   };
+
+  # necessary to work around haskell.nix issue
+  # see https://github.com/input-output-hk/haskell.nix/issues/2423
+  modules = [
+    {
+      packages.directory.flags.os-string = true;
+      packages.unix.flags.os-string = true;
+      packages.process.flags.os-string = true;
+    }
+  ];
 }
 
